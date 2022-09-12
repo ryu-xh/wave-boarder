@@ -2,79 +2,100 @@ import React from 'react';
 import { Label, Tag } from 'konva/lib/shapes/Label';
 import { Line } from 'konva/lib/shapes/Line';
 import { Text } from 'konva/lib/shapes/Text';
-import {Layer, CreatePointMarkerOptions} from "peaks.js";
 import {Group} from "konva/lib/Group";
+import {Layer, CreatePointMarkerOptions} from "peaks.js";
 
-const PointMarker = (options: CreatePointMarkerOptions) => {
-  const tag = new Tag({
-    fill:             options.color,
-    stroke:           options.color,
-    strokeWidth:      1,
-    pointerDirection: 'down',
-    pointerWidth:     10,
-    pointerHeight:    10,
-    lineJoin:         'round',
-    shadowColor:      'black',
-    shadowBlur:       10,
-    shadowOffsetX:    3,
-    shadowOffsetY:    3,
-    shadowOpacity:    0.3
-  });
+class PointMarker {
+  private options: CreatePointMarkerOptions;
+  private group: Group = new Group();
+  private label: Label = new Label();
+  private tag: Tag = new Tag();
+  private text: Text = new Text();
+  private line: Line = new Line();
 
-  const label = new Label({
-    x: 0.5,
-    y: 0.5,
-  });
+  constructor(_options: CreatePointMarkerOptions) {
+    this.options = _options;
+  }
 
-  const text = new Text({
-    text: options.point.labelText,
-    fontSize: 12,
-    padding: 5,
-    fill: '#FFFFFF',
-  });
+  init(_group: Group) {
+    this.group = _group;
 
-  const line = new Line({
-    x: 0,
-    y: 0,
-    stroke: options.color,
-    strokeWidth: 1,
-  });
+    this.label = new Label({
+      x: 0.5,
+      y: 0.5
+    });
 
-  label.add(tag);
-  label.add(text);
+    this.tag = new Tag({
+      fill:             this.options.color,
+      stroke:           this.options.color,
+      strokeWidth:      1,
+      pointerDirection: 'down',
+      pointerWidth:     10,
+      pointerHeight:    10,
+      lineJoin:         'round',
+      shadowColor:      'black',
+      shadowBlur:       10,
+      shadowOffsetX:    3,
+      shadowOffsetY:    3,
+      shadowOpacity:    0.3
+    });
 
-  var group: any = null;
+    this.label.add(this.tag);
 
-  const init = (_group: Group) => {
+    this.text = new Text({
+      text:       this.options.point.labelText,
+      fontFamily: 'Calibri',
+      fontSize:   14,
+      padding:    5,
+      fill:       'white'
+    });
 
-    _group.add(label);
-    _group.add(line);
+    this.label.add(this.text);
 
-    group = _group;
+    // Vertical Line - create with default y and points, the real values
+    // are set in fitToView().
+    this.line = new Line({
+      x:           0,
+      y:           0,
+      stroke:      this.options.color,
+      strokeWidth: 1
+    });
 
-    fitToView();
-    bindEventHandlers();
+    _group.add(this.label);
+    _group.add(this.line);
+
+    this.fitToView();
+
+    this.bindEventHandlers();
   };
 
-  const fitToView = () => {
-    const height = options.layer.getHeight();
+  bindEventHandlers() {
+    this.group.on('mouseenter', () => {
+      document.body.style.cursor = 'move';
+    });
 
-    const labelHeight = text.height() + 2 * text.padding();
-    const offsetTop = height - labelHeight;
-    const offsetBottom = height;
-    group.y(offsetTop + labelHeight + 0.5);
+    this.group.on('mouseleave', () => {
+      document.body.style.cursor = 'default';
+    });
+  };
 
-    line.points([0.5, 0, 0.5, height - labelHeight - offsetTop - offsetBottom]);
-  }
+  fitToView() {
+    const height = this.options.layer.getHeight();
 
-  const bindEventHandlers = () => {
+    const labelHeight = this.text.height() + 2 * this.text.padding();
+    const offsetTop = 14;
+    const offsetBottom = 26;
 
-  }
-};
+    this.group.y(offsetTop + labelHeight + 0.5);
 
-const createPointMarker = (options: CreatePointMarkerOptions) => {
+    this.line.points([0.5, 0, 0.5, height - labelHeight - offsetTop - offsetBottom]);
+  };
+}
+
+const createPointMarker = (options: any) => {
+  console.log(options.marker);
   if (options.view === 'zoomview') {
-    return PointMarker(options);
+    return new PointMarker(options);
   }
 };
 

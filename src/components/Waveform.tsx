@@ -1,5 +1,5 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
-import Peaks, {PointAddOptions} from 'peaks.js';
+import Peaks, {PeaksOptions, PointAddOptions} from 'peaks.js';
 
 import './Waveform.css';
 import createPointMarker from "./Marker";
@@ -23,7 +23,9 @@ const Waveform: React.FC<WaveformProps> = ({
   const [points, setPoints] = useState<PointAddOptions[]>([]);
 
   const initialize = () => {
-    const options: any = {
+    const audioContext = new AudioContext();
+
+    const options = {
       containers: {
         overview: overviewWaveformRef.current,
         zoomview: zoomviewWaveformRef.current
@@ -41,16 +43,11 @@ const Waveform: React.FC<WaveformProps> = ({
         playheadColor: '#FC6935',
         wheelMode: 'scroll',
       },
-      // createSegmentMarker: createSegmentMarker,
-      // createSegmentLabel: createSegmentLabel,
-      createPointMarker: createPointMarker
+      webAudio: {
+        audioContext: audioContext,
+      },
 
-    };
-
-    const audioContext = new AudioContext();
-
-    options.webAudio = {
-      audioContext: audioContext,
+      createPointMarker: createPointMarker,
     };
 
     if (peaks) {
