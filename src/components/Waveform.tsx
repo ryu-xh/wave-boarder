@@ -1,8 +1,8 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
-import Peaks, {PeaksOptions, PointAddOptions} from 'peaks.js';
+import Peaks, {PointAddOptions, PeaksOptions} from 'peaks.js';
 
 import './Waveform.css';
-import createPointMarker from "./Marker";
+import createPointMarker from "./createPointMarker";
 
 interface WaveformProps {
   audioUrl: string;
@@ -23,31 +23,39 @@ const Waveform: React.FC<WaveformProps> = ({
   const [points, setPoints] = useState<PointAddOptions[]>([]);
 
   const initialize = () => {
-    const audioContext = new AudioContext();
-
-    const options = {
+    const options: any = {
+      mediaElement: undefined,
+      webAudio: {
+        audioContext: undefined,
+      },
       containers: {
         overview: overviewWaveformRef.current,
         zoomview: zoomviewWaveformRef.current
       },
-      mediaElement: audioElementRef.current,
       keyboard: true,
       logger: console.error.bind(console),
       zoomLevels: [32, 64, 128, 256, 512],
-      overview: {
-        playheadColor: '#FFFFFF90',
-        playedWaveformColor: '#593695',
-        waveformColor: '#00E180',
-      },
+
+      playheadColor: '#FC6935',
+      waveformColor: '#00E180',
+
       zoomview: {
-        playheadColor: '#FC6935',
         wheelMode: 'scroll',
-      },
-      webAudio: {
-        audioContext: audioContext,
+        playheadClickTolerance: 0,
       },
 
-      createPointMarker: createPointMarker,
+      createPointMarker: createPointMarker
+
+    };
+
+    if (audioElementRef.current) {
+      options.mediaElement = audioElementRef.current;
+    }
+
+    const audioContext = new AudioContext();
+
+    options.webAudio = {
+      audioContext: audioContext,
     };
 
     if (peaks) {
@@ -80,6 +88,7 @@ const Waveform: React.FC<WaveformProps> = ({
         peaks.points.removeAll();
         peaks.points.add(points);
       }
+
     }
   }, [peaks, points]);
 
