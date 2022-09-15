@@ -46,7 +46,7 @@ const App: React.FC = () => {
               setAudioUrl(URL.createObjectURL(e.target.files[0]));
             }
           }}
-           style={{display: 'none'}}
+            style={{display: 'none'}}
           />
           <Button variant="outlined" onClick={() => {
             audioRef.current && audioRef.current.click();
